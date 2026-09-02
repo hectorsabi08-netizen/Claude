@@ -129,9 +129,13 @@ Write-Host ("   tomado: {0}   antiguedad: {1:N1} horas" -f $h.BackupFinishDate, 
 if ([int]$h.BackupType -ne 1) { throw "El .bak no es un backup FULL; no sirve para reemplazar la base." }
 if ($h.DatabaseName -ne $Database) { Write-Warning "El .bak es de la base '$($h.DatabaseName)', no de '$Database'." }
 if ($edad.TotalHours -gt $MaxHorasAntiguedad) { Write-Warning "El backup tiene mas de $MaxHorasAntiguedad horas. Si el origen sigue en uso, faltaran datos recientes." }
-Write-Host "   verificando integridad (RESTORE VERIFYONLY WITH CHECKSUM)..."
-Invoke-SqlNonQuery $conn "RESTORE VERIFYONLY FROM DISK = N'$bakSql' WITH CHECKSUM"
-Write-Ok "el .bak es legible y su checksum es correcto"
+if ($edad.TotalHours -lt 0) { Write-Host "   (antiguedad negativa: el servidor origen esta en otra zona horaria; la fecha mostrada es la hora local del origen)" }
+$conChecksum = [bool]$h.HasBackupChecksums
+$chk = if ($conChecksum) { " WITH CHECKSUM" } else { "" }
+Write-Host "   verificando integridad (RESTORE VERIFYONLY$chk)..."
+Invoke-SqlNonQuery $conn "RESTORE VERIFYONLY FROM DISK = N'$bakSql'$chk"
+if ($conChecksum) { Write-Ok "el .bak es legible y su checksum es correcto" }
+else { Write-Ok "el .bak es legible (se tomo sin CHECKSUM; para el corte conviene usar WITH CHECKSUM en el BACKUP)" }
 $files = Invoke-Sql $conn "RESTORE FILELISTONLY FROM DISK = N'$bakSql'"
 $files.Rows | ForEach-Object { Write-Host ("   {0,-4} {1,-25} {2,10:N0} MB  {3}" -f $_.Type, $_.LogicalName, ($_.Size/1MB), $_.PhysicalName) }
 
@@ -209,7 +213,8 @@ Write-Paso "RESTORE DATABASE (puede tardar varios minutos)"
 if ($existe) { Invoke-SqlNonQuery $conn "ALTER DATABASE [$Database] SET SINGLE_USER WITH ROLLBACK IMMEDIATE" }
 $sw = [Diagnostics.Stopwatch]::StartNew()
 try {
-    Invoke-SqlNonQuery $conn ("RESTORE DATABASE [$Database] FROM DISK = N'$bakSql' WITH REPLACE, RECOVERY, CHECKSUM, STATS = 10, " + ($moves -join ', '))
+    $chkRestore = if ($conChecksum) { "CHECKSUM, " } else { "" }
+    Invoke-SqlNonQuery $conn ("RESTORE DATABASE [$Database] FROM DISK = N'$bakSql' WITH REPLACE, RECOVERY, ${chkRestore}STATS = 10, " + ($moves -join ', '))
 } catch {
     if ($existe) { try { Invoke-SqlNonQuery $conn "ALTER DATABASE [$Database] SET MULTI_USER" } catch {} }
     throw "Fallo el RESTORE: $($_.Exception.Message). La base local sigue como estaba; copia previa en $copiaLocal"
