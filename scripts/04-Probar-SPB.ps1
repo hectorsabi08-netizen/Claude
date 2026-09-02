@@ -95,8 +95,6 @@ function Probar([string] $Url, [hashtable] $Headers = @{}) {
         else { Write-Rep ("   {0,-55} sin respuesta: {1}" -f $Url, $_.Exception.Message) }
     } catch { Write-Rep ("   {0,-55} sin respuesta: {1}" -f $Url, $_.Exception.Message) }
 }
-    }
-}
 Probar "http://localhost:$PuertoPruebas/login.aspx"
 Probar "http://localhost:$PuertoPruebas/default.aspx"
 Probar "http://localhost:$PuertoPruebas/DXR.axd?r=1_1"
