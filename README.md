@@ -53,6 +53,7 @@ Con Git instalado, `git clone https://github.com/hectorsabi08-netizen/Claude.git
 | 2 | `03-Configurar-WebConfig.ps1` | Diagnóstico SQL y cadenas de conexión. Con `-SqlHost localhost` aplica el caso A; sin parámetro es el caso B. Nunca muestra contraseñas. | Solo con `-SqlHost` |
 | 4 | `04-Probar-SPB.ps1` | Peticiones HTTP locales, Event Log, permisos, checklist manual. Reporte en `inventario\fase4-*.txt`. | No |
 | 5 | `05-Firewall-y-SQL.ps1` | Reglas 80/443 (+8080 temporal). Con `-MaxServerMemoryMB` fija memoria de SQL previa confirmación. | Sí |
+| 2 | `07-Restaurar-BD.ps1` | Restaura un `.bak` de SBP traído de 44.213.233.21 en el SQL local, crea/alinea el login `sbp_admin`, vincula usuarios huérfanos y verifica. Pide confirmación antes de reemplazar la base. | Sí |
 | 6 | `06-HTTPS-y-Cierre.ps1` | win-acme HTTP-01 para `sbp.bintec.io`, quita binding 8080, `customErrors RemoteOnly`, opcional `-RedirigirHttps`. Ejecutar tras el cambio de DNS. | Sí |
 
 Cada script es autónomo (no depende de otros archivos). Ejecute siempre el
@@ -92,8 +93,22 @@ y Claude revisa el reporte desde la web. `Web.config`, `.zip` y `.pfx` están en
 | Bindings | `http *:80 sbp.bintec.io`, `http *:8080` (pruebas), `https *:443 sbp.bintec.io` (fase 6) |
 | win-acme | `C:\wacs` |
 
+## Backup en el origen (44.213.233.21)
+
+En el servidor de la base, con SSMS o sqlcmd. `COPY_ONLY` no altera la cadena de
+backups que ya tenga el origen:
+
+```sql
+BACKUP DATABASE SBP TO DISK = N'C:\Backups\SBP_2026-09-02.bak'
+  WITH COPY_ONLY, COMPRESSION, CHECKSUM, INIT, STATS = 10;
+```
+
+Copiar el `.bak` a una carpeta del servidor destino y ejecutar
+`.\07-Restaurar-BD.ps1 -BakPath "C:\ruta\SBP_2026-09-02.bak"`.
+El día del corte se repite el mismo par de pasos con un `.bak` recién tomado,
+después de detener el uso de la aplicación en el origen.
+
 ## Fuera del alcance de los scripts
 
-- Restaurar la base `SBP` desde un `.bak` y crear el login `sbp_admin` (caso C del runbook).
 - Cambio del registro DNS, Security Group de AWS, restricción de la API key de Google Maps.
 - Las otras apps del origen (bots .NET Core, wallet-backend, widget).
