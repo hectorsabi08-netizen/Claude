@@ -88,7 +88,7 @@ if ($MaxServerMemoryMB) {
     Write-Host "   RAM total: $ramMB MB. Quedan $($ramMB - $MaxServerMemoryMB) MB para SO + IIS (recomendado >= 4096)."
     if (($ramMB - $MaxServerMemoryMB) -lt 4096) { Write-Warning "Deja menos de 4 GB para SO + IIS." }
     if (-not (Get-Command sqlcmd -ErrorAction SilentlyContinue)) { throw "sqlcmd no esta disponible." }
-    if (Confirm-Accion "Ejecutar sp_configure 'max server memory' = $MaxServerMemoryMB en $SqlInstance?") {
+    if (Confirm-Accion "Ejecutar sp_configure 'max server memory' = $MaxServerMemoryMB en ${SqlInstance}?") {
         $q = "EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'max server memory (MB)', $MaxServerMemoryMB; RECONFIGURE; EXEC sp_configure 'max server memory (MB)';"
         & sqlcmd -S $SqlInstance -E -Q $q
         Write-Ok "aplicado"
