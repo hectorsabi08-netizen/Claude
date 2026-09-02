@@ -8,7 +8,8 @@ function Assert-Admin {
 }
 
 function Get-InventarioDir {
-    $dir = Join-Path (Split-Path $PSScriptRoot -Parent) 'inventario'
+    $base = if ($PSScriptRoot) { Split-Path $PSScriptRoot -Parent } else { (Get-Location).Path }
+    $dir  = Join-Path $base 'inventario'
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
     return $dir
 }

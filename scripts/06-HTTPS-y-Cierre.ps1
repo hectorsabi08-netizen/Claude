@@ -15,7 +15,16 @@ param(
     [switch] $SoloCierre,
     [switch] $RedirigirHttps
 )
-. "$PSScriptRoot\_comun.ps1"
+# Localizar _comun.ps1 aunque $PSScriptRoot venga vacio (contenido pegado en consola, ISE "Run Selection")
+$scriptDir = if ($PSScriptRoot) { $PSScriptRoot }
+             elseif ($MyInvocation.MyCommand.Path) { Split-Path -Parent $MyInvocation.MyCommand.Path }
+             else { (Get-Location).Path }
+$comun = Join-Path $scriptDir '_comun.ps1'
+if (-not (Test-Path $comun)) { $comun = Join-Path (Get-Location).Path 'scripts\_comun.ps1' }
+if (-not (Test-Path $comun)) {
+    throw "No se encuentra _comun.ps1. Ejecuta el archivo desde la carpeta scripts del repositorio, por ejemplo:  cd C:\htdocs_apps\migracion-spb\scripts ; .\$(Split-Path -Leaf $MyInvocation.MyCommand.Path)   (no pegues el contenido en la consola)."
+}
+. $comun
 Assert-Admin
 $ErrorActionPreference = 'Stop'
 $log = Start-Log 'fase6-https'
@@ -68,7 +77,7 @@ if ($PSCmdlet.ShouldProcess("SPB :$PuertoPruebas", 'Remove-WebBinding')) {
     Get-NetFirewallRule -DisplayName "IIS pruebas $PuertoPruebas (temporal)" -ErrorAction SilentlyContinue | Remove-NetFirewallRule
     Write-Ok "binding y regla de firewall $PuertoPruebas eliminados"
 }
-& "$PSScriptRoot\03-Configurar-WebConfig.ps1" -CustomErrors RemoteOnly
+& (Join-Path $scriptDir "03-Configurar-WebConfig.ps1") -CustomErrors RemoteOnly
 
 Write-Paso "Configuracion final del sitio"
 & "$env:windir\System32\inetsrv\appcmd.exe" list site SPB /config | Tee-Object -FilePath (Join-Path (Get-InventarioDir) "sitio-SPB-final-$env:COMPUTERNAME.xml")

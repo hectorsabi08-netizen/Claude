@@ -47,6 +47,10 @@ cd C:\htdocs_apps\migracion-spb\scripts
 | 5 | `05-Firewall-y-SQL.ps1` | Reglas 80/443 (+8080 temporal). Con `-MaxServerMemoryMB` fija memoria de SQL previa confirmación. | Sí |
 | 6 | `06-HTTPS-y-Cierre.ps1` | win-acme HTTP-01 para `sbp.bintec.io`, quita binding 8080, `customErrors RemoteOnly`, opcional `-RedirigirHttps`. Ejecutar tras el cambio de DNS. | Sí |
 
+Ejecute siempre el **archivo** `.ps1` desde la carpeta `scripts` (por ejemplo
+`.\00-Verificar-Destino.ps1`). Si pega el contenido del script en la consola o usa
+"Run Selection" en ISE, PowerShell no sabe dónde está `_comun.ps1` y falla.
+
 Secuencia mínima:
 
 ```powershell

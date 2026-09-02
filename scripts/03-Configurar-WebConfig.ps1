@@ -21,7 +21,16 @@ param(
     [string] $SqlHostOrigen = '44.213.233.21',
     [ValidateSet('Off','RemoteOnly','On')] [string] $CustomErrors
 )
-. "$PSScriptRoot\_comun.ps1"
+# Localizar _comun.ps1 aunque $PSScriptRoot venga vacio (contenido pegado en consola, ISE "Run Selection")
+$scriptDir = if ($PSScriptRoot) { $PSScriptRoot }
+             elseif ($MyInvocation.MyCommand.Path) { Split-Path -Parent $MyInvocation.MyCommand.Path }
+             else { (Get-Location).Path }
+$comun = Join-Path $scriptDir '_comun.ps1'
+if (-not (Test-Path $comun)) { $comun = Join-Path (Get-Location).Path 'scripts\_comun.ps1' }
+if (-not (Test-Path $comun)) {
+    throw "No se encuentra _comun.ps1. Ejecuta el archivo desde la carpeta scripts del repositorio, por ejemplo:  cd C:\htdocs_apps\migracion-spb\scripts ; .\$(Split-Path -Leaf $MyInvocation.MyCommand.Path)   (no pegues el contenido en la consola)."
+}
+. $comun
 Assert-Admin
 $ErrorActionPreference = 'Stop'
 if (-not (Test-Path $WebConfig)) { throw "No existe $WebConfig. Ejecuta primero 02-Desplegar-SPB.ps1" }
