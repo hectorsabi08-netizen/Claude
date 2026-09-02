@@ -149,6 +149,7 @@ if (Test-Path $BackupRoot) {
     $hashFile = Get-ChildItem $BackupRoot -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'sha256|hash' } | Select-Object -First 1
     if ($hashFile) {
         Write-Rep "   Archivo de hashes: $($hashFile.FullName)"
+        if ($hashFile.Length -eq 0) { Write-Rep "   AVISO: el archivo de hashes esta vacio; no se puede verificar la integridad de los zip." }
         Get-Content $hashFile.FullName | ForEach-Object {
             # Acepta formato sha256sum ("HASH  archivo"), Get-FileHash en tabla o CSV
             if ($_ -match '([0-9A-Fa-f]{64})' -and $_ -match '([^\s\\/*"]+\.(zip|md|txt))') {

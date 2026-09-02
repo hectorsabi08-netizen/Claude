@@ -29,13 +29,21 @@ Opciones:
 
 ## Uso
 
-En el servidor destino, **PowerShell como Administrador**:
+En el servidor destino, **PowerShell como Administrador**. Sin Git (caso habitual
+en un servidor limpio), descargue la rama como ZIP:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-git clone https://github.com/hectorsabi08-netizen/Claude.git C:\htdocs_apps\migracion-spb
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+Invoke-WebRequest "https://github.com/hectorsabi08-netizen/Claude/archive/refs/heads/claude/replicar-server-iis-moaebx.zip" -OutFile "$env:TEMP\spb.zip" -UseBasicParsing
+Expand-Archive "$env:TEMP\spb.zip" "$env:TEMP\spb" -Force
+New-Item -ItemType Directory -Force C:\htdocs_apps\migracion-spb | Out-Null
+Copy-Item "$env:TEMP\spb\Claude-*\*" C:\htdocs_apps\migracion-spb -Recurse -Force
 cd C:\htdocs_apps\migracion-spb\scripts
 ```
+
+Para traer versiones nuevas después, ejecute `.\Actualizar.ps1` desde esa carpeta.
+Con Git instalado, `git clone https://github.com/hectorsabi08-netizen/Claude.git C:\htdocs_apps\migracion-spb` y `git pull` hacen lo mismo.
 
 | Fase | Script | Qué hace | Cambia el sistema |
 |---|---|---|---|
