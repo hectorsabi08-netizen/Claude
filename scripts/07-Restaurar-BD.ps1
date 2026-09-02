@@ -193,7 +193,7 @@ if ($SoloValidar) {
 # ---------- D. restore ----------
 Write-Paso "D. Confirmacion"
 if ($existe) { Write-Host "   [$Database] sera REEMPLAZADA por el backup del $($h.BackupFinishDate). Copia previa: $copiaLocal" }
-if (-not (Confirm-Accion "Restaurar [$Database] en $SqlInstance desde $BakPath?")) { $conn.Close(); Stop-Log; return }
+if (-not (Confirm-Accion "Restaurar [$Database] en $SqlInstance desde ${BakPath}?")) { $conn.Close(); Stop-Log; return }
 
 $actuales = @{}
 if ($existe) { (Invoke-Sql $conn "SELECT name, physical_name FROM sys.master_files WHERE database_id = DB_ID(N'$Database')").Rows | ForEach-Object { $actuales[$_.name] = $_.physical_name } }
