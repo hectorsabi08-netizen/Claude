@@ -1,0 +1,24 @@
+== FASE 4: pruebas SPB  (09/02/2026 11:30:53)  host EC2AMAZ-FUREVU4
+
+-- Estado IIS
+   sitio SPB: Started   ruta: C:\htdocs_apps\SPB
+   pool  SPB: Started   runtime: v4.0   32bit: False
+   binding: http *:80:sbp.bintec.io
+   binding: http *:8080:
+
+-- Peticiones HTTP locales
+   http://localhost:8080/login.aspx                        200  (9732 bytes)
+   http://localhost:8080/default.aspx                      sin respuesta: Operation is not valid due to the current state of the object.
+   http://localhost:8080/DXR.axd?r=1_1                     200  (60359 bytes)
+   http://localhost/login.aspx                             200  (9732 bytes)
+
+-- Ultimos errores ASP.NET / IIS en el Event Log (24 h)
+   (ninguno)
+
+-- Permisos de escritura de 'IIS AppPool\SPB'
+   C:\UploadTemp\documentos                      Modify OK
+   C:\htdocs_apps\SPB\UploadImages               Modify OK
+   C:\htdocs_apps\SPB\UploadTemp                 Modify OK
+   C:\htdocs_apps\SPB\App_Data                   Modify OK
+
+Nota: Web.config en caso A (SqlServer y localhost_SBP_Connection -> localhost). Copia en Web.config.origen.

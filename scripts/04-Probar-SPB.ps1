@@ -78,14 +78,23 @@ Get-WebBinding -Name SPB | ForEach-Object { Write-Rep "   binding: $($_.protocol
 
 Write-Rep "`n-- Peticiones HTTP locales"
 function Probar([string] $Url, [hashtable] $Headers = @{}) {
+    # HttpWebRequest directo: Invoke-WebRequest -MaximumRedirection 0 falla en PowerShell 5.1 con 302
     try {
-        $r = Invoke-WebRequest -Uri $Url -UseBasicParsing -MaximumRedirection 0 -Headers $Headers -TimeoutSec 60 -ErrorAction Stop
-        Write-Rep ("   {0,-55} {1}  ({2} bytes)" -f $Url, $r.StatusCode, $r.RawContentLength)
-    } catch {
-        $code = $_.Exception.Response.StatusCode.value__
-        if ($code -in 301,302) { Write-Rep ("   {0,-55} {1} -> {2}" -f $Url, $code, $_.Exception.Response.Headers['Location']) }
-        elseif ($code) { Write-Rep ("   {0,-55} {1}  ERROR" -f $Url, $code) }
+        $req = [System.Net.HttpWebRequest]::Create($Url)
+        $req.AllowAutoRedirect = $false; $req.Timeout = 60000; $req.UserAgent = 'Mozilla/5.0 (spb-check)'
+        foreach ($k in $Headers.Keys) { if ($k -eq 'Host') { $req.Host = $Headers[$k] } else { $req.Headers[$k] = $Headers[$k] } }
+        $resp = $req.GetResponse()
+        $code = [int]$resp.StatusCode; $len = $resp.ContentLength; $loc = $resp.Headers['Location']; $resp.Close()
+        if ($code -in 301,302) { Write-Rep ("   {0,-55} {1} -> {2}" -f $Url, $code, $loc) }
+        else { Write-Rep ("   {0,-55} {1}  ({2} bytes)" -f $Url, $code, $len) }
+    } catch [System.Net.WebException] {
+        $r = $_.Exception.Response
+        if ($r) { $code = [int]$r.StatusCode; $loc = $r.Headers['Location']; $r.Close()
+            if ($code -in 301,302) { Write-Rep ("   {0,-55} {1} -> {2}" -f $Url, $code, $loc) }
+            else { Write-Rep ("   {0,-55} {1}  ERROR" -f $Url, $code) } }
         else { Write-Rep ("   {0,-55} sin respuesta: {1}" -f $Url, $_.Exception.Message) }
+    } catch { Write-Rep ("   {0,-55} sin respuesta: {1}" -f $Url, $_.Exception.Message) }
+}
     }
 }
 Probar "http://localhost:$PuertoPruebas/login.aspx"
