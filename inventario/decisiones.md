@@ -14,6 +14,22 @@ Servidor destino: EC2AMAZ-FUREVU4, Windows Server 2019 Datacenter, IP pública 3
 | 2026-09-02 | Fase 4 | login.aspx 200, DXR.axd 200, sin errores en Event Log, permisos OK. Pruebas de navegador pendientes. |
 | 2026-09-02 | Fase 5 | Reglas firewall 80/443/8080 creadas. SQL max server memory 2048 -> 4096 MB. |
 
+| 2026-09-02 | Uso | GenLog: último login 2026-08-29 (J.Navarro). Últimos 30 días: solo 2 usuarios activos (J.Navarro, d.hernandez), 2-12 eventos/día, nada desde el 29/08. El corte puede hacerse en horario laboral avisando a esos dos usuarios. |
+| 2026-09-02 | Pruebas | localhost:8080/login.aspx carga el formulario. Desde fuera no carga: falta abrir puertos en el Security Group de AWS. |
+
+## Plan de corte propuesto
+
+1. Abrir 80 y 443 en el Security Group (antes, para probar por hosts).
+2. Pruebas desde navegador con hosts -> 3.136.146.205 (checklist del script 04).
+3. Un día antes: bajar TTL del registro A de sbp.bintec.io a 300 s.
+4. Día del corte: avisar a J.Navarro y d.hernandez; detener el sitio en el origen (54.236.39.192);
+   BACKUP DATABASE SBP ... WITH COPY_ONLY, CHECKSUM en 44.213.233.21; copiar a C:\SQLBackups;
+   .\07-Restaurar-BD.ps1 -BakPath ... -SkipBackupLocal (la comparación con el origen debe dar "sin diferencias").
+5. Cambiar el registro A a 3.136.146.205.
+6. .\06-HTTPS-y-Cierre.ps1 -Email <correo> (win-acme HTTP-01, quita 8080, customErrors RemoteOnly).
+7. Verificar https://sbp.bintec.io desde fuera; restringir la API key de Google Maps al nuevo host/IP.
+8. Rollback: volver el DNS a 54.236.39.192 mientras el origen siga encendido.
+
 ## Pendiente
 
 - Pruebas desde el navegador (checklist del script 04).
