@@ -1,0 +1,6 @@
+# Nunca subir configuracion con secretos ni paquetes
+Web.config
+Web.config.*
+*.zip
+*.pfx
+*.bak
