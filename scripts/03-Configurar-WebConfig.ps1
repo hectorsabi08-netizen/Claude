@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     FASE 2 del runbook SPB: cadenas de conexion en Web.config segun donde vive la base SBP.
     Nunca imprime contraseñas. Hace copia Web.config.origen antes de tocar nada.
@@ -21,16 +21,57 @@ param(
     [string] $SqlHostOrigen = '44.213.233.21',
     [ValidateSet('Off','RemoteOnly','On')] [string] $CustomErrors
 )
-# Localizar _comun.ps1 aunque $PSScriptRoot venga vacio (contenido pegado en consola, ISE "Run Selection")
-$scriptDir = if ($PSScriptRoot) { $PSScriptRoot }
-             elseif ($MyInvocation.MyCommand.Path) { Split-Path -Parent $MyInvocation.MyCommand.Path }
-             else { (Get-Location).Path }
-$comun = Join-Path $scriptDir '_comun.ps1'
-if (-not (Test-Path $comun)) { $comun = Join-Path (Get-Location).Path 'scripts\_comun.ps1' }
-if (-not (Test-Path $comun)) {
-    throw "No se encuentra _comun.ps1. Ejecuta el archivo desde la carpeta scripts del repositorio, por ejemplo:  cd C:\htdocs_apps\migracion-spb\scripts ; .\$(Split-Path -Leaf $MyInvocation.MyCommand.Path)   (no pegues el contenido en la consola)."
+#region Funciones comunes (copiadas en cada script para que sea autonomo)
+$scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
+function Assert-Admin {
+    $p = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
+    if (-not $p.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        throw "Ejecutar PowerShell como Administrador."
+    }
 }
-. $comun
+
+function Get-InventarioDir {
+    $base = if ($PSScriptRoot) { Split-Path $PSScriptRoot -Parent } else { (Get-Location).Path }
+    $dir  = Join-Path $base 'inventario'
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    return $dir
+}
+
+function Start-Log([string] $Nombre) {
+    $dir  = Get-InventarioDir
+    $file = Join-Path $dir ("{0}-{1}-{2}.log" -f $Nombre, $env:COMPUTERNAME, (Get-Date -Format 'yyyyMMdd-HHmm'))
+    try { Start-Transcript -Path $file -Append | Out-Null } catch {}
+    return $file
+}
+
+function Stop-Log { try { Stop-Transcript | Out-Null } catch {} }
+
+function Write-Paso([string] $Texto) { Write-Host "`n>> $Texto" -ForegroundColor Cyan }
+function Write-Ok([string] $Texto)   { Write-Host "   OK  $Texto" -ForegroundColor Green }
+function Write-Falta([string] $Texto){ Write-Host "   FALTA  $Texto" -ForegroundColor Yellow }
+
+function Confirm-Accion([string] $Texto) {
+    # Confirmacion explicita antes de acciones que el runbook marca como sensibles
+    # (reinicio, SQL Server, DNS). Devuelve $true solo si el usuario escribe SI.
+    $r = Read-Host "$Texto  Escribe SI para continuar"
+    return ($r -eq 'SI')
+}
+
+function Enable-Tls12 {
+    try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch {}
+}
+
+function Get-MaskedConnectionString([string] $Valor) {
+    # Oculta Password=... y pwd=... para no filtrar secretos en logs ni en el chat
+    return ($Valor -replace '(?i)(password|pwd)\s*=\s*[^;]*', '$1=***')
+}
+
+function Find-BackupFile([string] $Root, [string] $Pattern) {
+    if (-not (Test-Path $Root)) { return $null }
+    Get-ChildItem -Path $Root -Recurse -File -Filter $Pattern -ErrorAction SilentlyContinue |
+        Sort-Object Length -Descending | Select-Object -First 1
+}
+#endregion
 Assert-Admin
 $ErrorActionPreference = 'Stop'
 if (-not (Test-Path $WebConfig)) { throw "No existe $WebConfig. Ejecuta primero 02-Desplegar-SPB.ps1" }
