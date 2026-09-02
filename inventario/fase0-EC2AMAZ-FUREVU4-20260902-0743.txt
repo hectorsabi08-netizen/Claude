@@ -1,0 +1,69 @@
+== FASE 0: verificacion del servidor destino  (09/02/2026 07:43:02)
+Host: EC2AMAZ-FUREVU4
+
+-- Sistema operativo
+Microsoft Windows Server 2019 Datacenter  build 10.0.17763.0
+RAM total GB: 7.9
+Disco C: libre GB: 43.6
+
+-- .NET Framework (Release >= 528040 es 4.8)
+Version: 4.8.03761  Release: 528049
+
+-- Roles IIS instalados
+Web-Server, Web-WebServer, Web-Common-Http, Web-Default-Doc, Web-Dir-Browsing, Web-Http-Errors, Web-Static-Content, Web-Health, Web-Http-Logging, Web-Performance, Web-Stat-Compression, Web-Security, Web-Filtering, Web-Mgmt-Tools, Web-Mgmt-Console
+   Web-Asp-Net45        FALTA
+   Web-Net-Ext45        FALTA
+   Web-ISAPI-Ext        FALTA
+   Web-ISAPI-Filter     FALTA
+   Web-Static-Content   instalado
+   Web-Default-Doc      instalado
+
+-- Visual C++ 2015-2022 Redistributable x64
+Microsoft Visual C++ 2015-2022 Redistributable (x64) - 14.44.35211 14.44.35211.0
+
+-- URL Rewrite
+no instalado (opcional para SPB)
+
+-- SQL Server local
+   MSSQLSERVER               Running    Automatic
+   Bases y logins relevantes (localhost):
+   DB: SBP
+   AUTH_MODE: Mixta
+   Conectividad al SQL actual 44.213.233.21:1433:
+   TcpTestSucceeded = True
+
+-- Puertos 80/443/1433/8080 en escucha
+   :::1433  pid 3492 (sqlservr)
+   :::80  pid 4 (System)
+   0.0.0.0:1433  pid 3492 (sqlservr)
+
+-- IIS: sitios y pools existentes
+   Sitio Default Web Site          Started   *:80:
+   Pool  DefaultAppPool            Started   v4.0 32bit=False
+
+-- Rutas destino
+   C:\htdocs_apps\SPB\Web.config                 no existe
+   C:\htdocs_apps\SPB\bin\Operaciones.dll        no existe
+   C:\UploadTemp\documentos                      no existe
+   C:\wacs\wacs.exe                              no existe
+
+-- Contenido del backup: C:\htdocs_apps\BK\migracion-2026-09\OneDrive_2026-09-02\Server 54
+              0 KB  hashes.txt
+             29 KB  MIGRACION-SPB-IIS.md
+              6 KB  PROMPT-ANDINO.md
+        298,284 KB  SPB-app.zip
+        704,252 KB  SPB-documentos.zip
+             17 KB  SPB-INSTALAR-EN-DESTINO.md
+   encontrado SPB-app.zip -> C:\htdocs_apps\BK\migracion-2026-09\OneDrive_2026-09-02\Server 54\SPB-app.zip
+   encontrado SPB-documentos.zip -> C:\htdocs_apps\BK\migracion-2026-09\OneDrive_2026-09-02\Server 54\SPB-documentos.zip
+   encontrado MIGRACION-SPB-IIS.md -> C:\htdocs_apps\BK\migracion-2026-09\OneDrive_2026-09-02\Server 54\MIGRACION-SPB-IIS.md
+   Archivo de hashes: C:\htdocs_apps\BK\migracion-2026-09\OneDrive_2026-09-02\Server 54\hashes.txt
+   hash SPB-app.zip            OK
+   hash SPB-documentos.zip     OK
+
+== RESUMEN
+Pendiente antes de desplegar:
+   - Feature IIS Web-Asp-Net45
+   - Feature IIS Web-Net-Ext45
+   - Feature IIS Web-ISAPI-Ext
+   - Feature IIS Web-ISAPI-Filter
