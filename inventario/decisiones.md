@@ -17,6 +17,8 @@ Servidor destino: EC2AMAZ-FUREVU4, Windows Server 2019 Datacenter, IP pública 3
 | 2026-09-02 | Uso | GenLog: último login 2026-08-29 (J.Navarro). Últimos 30 días: solo 2 usuarios activos (J.Navarro, d.hernandez), 2-12 eventos/día, nada desde el 29/08. El corte puede hacerse en horario laboral avisando a esos dos usuarios. |
 | 2026-09-02 | Pruebas | localhost:8080/login.aspx carga el formulario. Desde fuera no carga: falta abrir puertos en el Security Group de AWS. |
 
+| 2026-09-02 | Decisión | Confirmado por el usuario: SPB en este servidor usa la base LOCAL (caso A). La base del 44 solo se vuelve a copiar el día del corte. |
+
 ## Plan de corte propuesto
 
 1. Abrir 80 y 443 en el Security Group (antes, para probar por hosts).
