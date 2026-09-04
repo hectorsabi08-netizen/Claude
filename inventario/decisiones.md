@@ -19,6 +19,9 @@ Servidor destino: EC2AMAZ-FUREVU4, Windows Server 2019 Datacenter, IP pública 3
 
 | 2026-09-02 | Decisión | Confirmado por el usuario: SPB en este servidor usa la base LOCAL (caso A). La base del 44 solo se vuelve a copiar el día del corte. |
 
+| 2026-09-03 | Corte | Puntos 1-3 hechos (aviso a usuarios, sitio origen detenido, .bak final). IP 3.136.146.205 confirmada estática. DNS en SmarterASP.NET, TTL ya en 300 s. |
+| 2026-09-03 | Corte | SBP_corte.bak (tomado 19:25 hora origen) restaurado a las 18:33. 55 tablas, 45.089 filas, idéntico al origen en vivo. Login sbp_admin OK. Pool SPB arrancado. |
+
 ## Plan de corte propuesto
 
 1. Abrir 80 y 443 en el Security Group (antes, para probar por hosts).
