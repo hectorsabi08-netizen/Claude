@@ -116,6 +116,8 @@ if ($SqlHost) {
         $nuevo = [regex]::Replace($nuevo, $patron, { param($m) $m.Groups[1].Value + $SqlHost })
         Write-Ok "$coincidencias cadena(s) apuntan ahora a $SqlHost"
     } else { Write-Host "   Web.config no contiene $SqlHostOrigen, sin cambios" }
+} elseif ($raw -notmatch [regex]::Escape($SqlHostOrigen)) {
+    Write-Paso "Cadenas de conexion sin cambios (ya no apuntan a $SqlHostOrigen)"
 } else {
     Write-Paso "Caso B: la base sigue en $SqlHostOrigen, cadenas sin cambios"
     if (-not $t.TcpTestSucceeded) { Write-Warning "Este servidor NO alcanza ${SqlHostOrigen}:1433. Hay que abrir el firewall/Security Group del SQL para la IP de este servidor." }

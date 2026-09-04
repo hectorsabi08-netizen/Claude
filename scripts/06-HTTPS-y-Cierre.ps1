@@ -88,10 +88,15 @@ if (-not $SoloCierre) {
               '--installation','iis','--accepttos','--emailaddress',$Email)
     if ($PSCmdlet.ShouldProcess('C:\wacs\wacs.exe', ($wacsArgs -join ' '))) {
         & 'C:\wacs\wacs.exe' @wacsArgs
-        if ($LASTEXITCODE -ne 0) { Write-Warning "wacs.exe devolvio $LASTEXITCODE; revisa C:\ProgramData\win-acme\*\Log" }
+        if ($LASTEXITCODE -ne 0) {
+            Stop-Log
+            throw "wacs.exe devolvio $LASTEXITCODE. No se hace el cierre. Si el error dice 'Timeout during connect', el Security Group de AWS no permite TCP 80 desde Internet: abrelo y vuelve a ejecutar este script. Log de win-acme: C:\ProgramData\win-acme\acme-v02.api.letsencrypt.org\Log"
+        }
     }
     Write-Paso "Bindings https"
-    Get-WebBinding -Name SPB -Protocol https | ForEach-Object { Write-Ok "$($_.bindingInformation) sslFlags=$($_.sslFlags)" }
+    $httpsB = Get-WebBinding -Name SPB -Protocol https
+    if (-not $httpsB) { Stop-Log; throw "win-acme termino sin crear el binding https; revisa el log antes de continuar." }
+    $httpsB | ForEach-Object { Write-Ok "$($_.bindingInformation) sslFlags=$($_.sslFlags)" }
     netsh http show sslcert | Select-String -Pattern 'Hostname:IP|Certificate Hash|Application ID' | ForEach-Object { Write-Host "   $_" }
 }
 
