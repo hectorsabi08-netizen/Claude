@@ -44,21 +44,20 @@ DNS: registro A `sbp` en SmarterASP.NET -> 3.136.146.205, TTL 300 s. Verificado 
 | login.aspx carga desde Internet por IP:8080 | OK (antes del corte) |
 | Sin errores ASP.NET en Event Log | OK |
 | Permisos de escritura en documentos, UploadImages, UploadTemp, App_Data | OK |
-| Iniciar sesión con usuario real | pendiente de confirmar por el usuario |
+| Iniciar sesión con usuario real | OK (usuario gerencia, 2026-09-03) |
 | Exportar reporte a PDF y Excel | pendiente de confirmar |
 | Subir documento / imagen | pendiente de confirmar |
-| Mapa de Google | pendiente de confirmar (revisar restricción de API key) |
+| Mapa de Google | OK. La clave se valida por referrer (dominio), no por IP; no requiere cambios |
 | Adjuntos S3 | pendiente de confirmar |
-| https://sbp.bintec.io desde Internet | pendiente de confirmar |
+| https://sbp.bintec.io desde Internet | OK |
 
 ## 5. Pendientes del usuario
 
 1. Security Group: eliminar la regla TCP 8080 (ya no hay binding). Mantener 80 y 443. Nunca abrir 1433.
-2. Google Maps: agregar sbp.bintec.io / 3.136.146.205 a las restricciones de la API key si las tiene.
-3. Rotar los secretos que viajaron en texto plano en el paquete (contraseña de sbp_admin, claves AWS S3, API key de Google).
-4. Mantener el origen (54.236.39.192 y la base en 44.213.233.21) encendido unos días como rollback; después apagar el sitio SPB allí de forma definitiva.
-5. El wildcard *.bintec.io del otro servidor no se ve afectado; su renovación sigue allá.
-6. Migración de las otras apps del origen (bots .NET Core, wallet-backend, widget): fuera de este alcance.
+2. Rotar los secretos que viajaron en texto plano en el paquete (contraseña de sbp_admin, claves AWS S3, API key de Google).
+3. Mantener el origen (54.236.39.192 y la base en 44.213.233.21) encendido unos días como rollback; después apagar el sitio SPB allí de forma definitiva.
+4. El wildcard *.bintec.io del otro servidor no se ve afectado; su renovación sigue allá.
+5. Migración de las otras apps del origen (bots .NET Core, wallet-backend, widget): fuera de este alcance.
 
 ## 6. Rollback
 
