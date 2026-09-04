@@ -25,6 +25,8 @@ Servidor destino: EC2AMAZ-FUREVU4, Windows Server 2019 Datacenter, IP pública 3
 | 2026-09-03 | Corte | DNS cambiado en SmarterASP.NET: sbp.bintec.io -> 3.136.146.205 (verificado en 8.8.8.8). |
 | 2026-09-03 | Fase 6 | win-acme fallo: "Timeout during connect" al puerto 80 -> Security Group sin TCP 80 abierto. Binding 8080 ya eliminado, customErrors=RemoteOnly. Pendiente: abrir 80/443 en SG y reejecutar 06. |
 
+| 2026-09-03 | Fase 6 | Security Group 80/443 abierto. Certificado Let's Encrypt emitido solo para sbp.bintec.io, binding https *:443 SNI. MIGRACIÓN DE SPB COMPLETA. Ver INFORME-FINAL-SPB.md. |
+
 ## Plan de corte propuesto
 
 1. Abrir 80 y 443 en el Security Group (antes, para probar por hosts).
